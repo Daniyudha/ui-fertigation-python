@@ -16,18 +16,19 @@ class Ui_home:
         clear_frame(self.square_frame)
         self.ui_images()
         self.ui_widgets()
+        self.manual_frame.place_forget()
 
     def ui_images(self):
         # https://pixabay.com/vectors/it-business-icons-computers-722950/
         self.air_image = Image.open("images/home_images/water.png")
         self.air_image = customtkinter.CTkImage(dark_image=self.air_image,
                                                     light_image=self.air_image, 
-                                                    size=(60, 87))
+                                                    size=(80, 107))
         
         self.tanah_image = Image.open("images/home_images/soil.png")
         self.tanah_image = customtkinter.CTkImage(dark_image=self.tanah_image,
                                                     light_image=self.tanah_image, 
-                                                    size=(60, 87))
+                                                    size=(80, 107))
         
         self.categorypil_image = Image.open("images/home_images/category.png")
         self.category_image = customtkinter.CTkImage(dark_image=self.categorypil_image,
@@ -58,6 +59,11 @@ class Ui_home:
         self.on_btn = customtkinter.CTkImage(dark_image=self.on_btn,
                                                 light_image=self.on_btn,
                                                 size=(60, 60))
+        
+        self.ceklis = Image.open("images/home_images/ceklis.png")
+        self.ceklis = customtkinter.CTkImage(dark_image=self.ceklis,
+                                                light_image=self.ceklis,
+                                                size=(10.94, 8.38))
 
     def ui_widgets(self):
         # self.topbar_frame = customtkinter.CTkFrame(master=self.square_frame,
@@ -90,7 +96,7 @@ class Ui_home:
         self.water_frame.place(x=14, y=0)
 
         self.waterimage_label = customtkinter.CTkLabel(master=self.water_frame, text=None, image=self.air_image)
-        self.waterimage_label.place(x=20, y=51)
+        self.waterimage_label.place(x=20, y=41)
 
         # ===== EC =====
         self.water_frame_text1 = customtkinter.CTkLabel(master=self.water_frame,
@@ -145,7 +151,7 @@ class Ui_home:
         self.soil_frame.place(x=284, y=0)
 
         self.soilimage_label = customtkinter.CTkLabel(master=self.soil_frame, text=None, image=self.tanah_image)
-        self.soilimage_label.place(x=20, y=51)
+        self.soilimage_label.place(x=20, y=41)
 
         # ===== EC =====
         self.soil_frame_text1 = customtkinter.CTkLabel(master=self.soil_frame,
@@ -360,9 +366,15 @@ class Ui_home:
         self.button_label.place(x=211, y=17)
         
         self.switch_var = customtkinter.StringVar(value="off")
+        # self.switch = customtkinter.CTkSwitch(master=self.input, width=55, height=29, switch_width=52, switch_height=27,
+        #                                       border_color="#006495", fg_color="#ffffff",
+        #                                       border_width=2, text=None, progress_color="#006495", variable=self.switch_var,
+        #                                       onvalue="on", offvalue="off", command=self.toggle_view)
+        # self.switch.place(x=266, y=16)
+        
         self.switch = customtkinter.CTkSwitch(master=self.input, width=55, height=29, switch_width=52, switch_height=27,
-                                              border_color="#006495", fg_color="#ffffff",
-                                              border_width=2, text=None, progress_color="#006495", variable=self.switch_var,
+                                              variable=self.switch_var, fg_color="#D9D9D9", button_color="#006495",
+                                              button_hover_color="#006495", text=None,
                                               onvalue="on", offvalue="off", command=self.toggle_view)
         self.switch.place(x=266, y=16)
         
@@ -453,8 +465,103 @@ class Ui_home:
         # ===== End Frame Auto =====
         
         # ===== Start Frame Manual =====
-        self.manual_frame = customtkinter.CTkFrame(master=self.input, width=291, height=300, fg_color="#000000")
+        self.manual_frame = customtkinter.CTkFrame(master=self.input, width=291, height=300, fg_color="#ffffff")
         self.manual_frame.place(x=30, y=55)
+        
+        #===== Input Name =====
+        self.input_name = customtkinter.CTkEntry(master=self.manual_frame, width=225, height=45, 
+                                                  fg_color="#E1F8FF", text_color="#006495", border_color="#E1F8FF",
+                                                  font=("Poppins", 12), placeholder_text="Input Plant Name", placeholder_text_color="#93CCEC")
+        self.input_name.place(x=0, y=0)
+        
+        # ===== save btn =====
+        self.save_button = customtkinter.CTkButton(master=self.manual_frame, width=56, height=45, corner_radius=10,
+                                                   text=None, image=self.ceklis)
+        self.save_button.place(x=235, y=0)
+        
+        # ====== EC =====
+        self.text1 = customtkinter.CTkLabel(master=self.manual_frame,
+                                            text="EC",
+                                            font=("Poppins", 12), text_color="#006495")
+        self.text1.place(x=0, y=63)
+        
+        self.inner_ec = customtkinter.CTkFrame(master=self.manual_frame, width=151, height=45, fg_color="#E1F8FF")
+        self.inner_ec.place(x=130, y=51)
+
+        self.data_ec = customtkinter.CTkEntry(master=self.inner_ec, width=50, height=44, fg_color="#E1F8FF", 
+                                            text_color="#006495", border_color="#E1F8FF",font=("Poppins", 20, "bold"), 
+                                            placeholder_text="00", placeholder_text_color="#93CCEC")
+        self.data_ec.place(x=45, y=0)
+
+        self.label1 = customtkinter.CTkLabel(master=self.inner_ec, text="ms/cm", font=("Poppins", 10), 
+                                             text_color="#006495", fg_color="#E1F8FF")
+        self.label1.place(x=94, y=4)
+        
+        # ====== PH =====
+        self.text2 = customtkinter.CTkLabel(master=self.manual_frame,
+                                            text="PH",
+                                            font=("Poppins", 12), text_color="#006495")
+        self.text2.place(x=0, y=113)
+        
+        self.inner_ph = customtkinter.CTkFrame(master=self.manual_frame, width=151, height=45, fg_color="#E1F8FF")
+        self.inner_ph.place(x=130, y=102)
+
+        self.data_ph = customtkinter.CTkEntry(master=self.inner_ph, width=50, height=44, fg_color="#E1F8FF", 
+                                            text_color="#006495", border_color="#E1F8FF",font=("Poppins", 20, "bold"), 
+                                            placeholder_text="00", placeholder_text_color="#93CCEC")
+        self.data_ph.place(x=45, y=0)
+        
+        # ====== HUMIDITY =====
+        self.text3 = customtkinter.CTkLabel(master=self.manual_frame,
+                                            text="Humidity",
+                                            font=("Poppins", 12), text_color="#006495")
+        self.text3.place(x=0, y=163)
+        
+        self.inner_hum = customtkinter.CTkFrame(master=self.manual_frame, width=151, height=45, fg_color="#E1F8FF")
+        self.inner_hum.place(x=130, y=153)
+
+        self.data_hum = customtkinter.CTkEntry(master=self.inner_hum, width=50, height=44, fg_color="#E1F8FF", 
+                                            text_color="#006495", border_color="#E1F8FF",font=("Poppins", 20, "bold"), 
+                                            placeholder_text="00", placeholder_text_color="#93CCEC")
+        self.data_hum.place(x=45, y=0)
+
+        self.label3 = customtkinter.CTkLabel(master=self.inner_hum, text="%",
+                                             font=("Poppins", 10), text_color="#006495")
+        self.label3.place(x=94, y=4)
+        
+        # ====== VOLUME =====
+        self.text4 = customtkinter.CTkLabel(master=self.manual_frame,
+                                            text="Volume",
+                                            font=("Poppins", 12), text_color="#006495")
+        self.text4.place(x=0, y=213)
+        
+        self.inner_vol = customtkinter.CTkFrame(master=self.manual_frame, width=151, height=45, fg_color="#E1F8FF")
+        self.inner_vol.place(x=130, y=204)
+
+        self.data_vol = customtkinter.CTkEntry(master=self.inner_vol, width=50, height=44, fg_color="#E1F8FF", 
+                                            text_color="#006495", border_color="#E1F8FF",font=("Poppins", 20, "bold"), 
+                                            placeholder_text="00", placeholder_text_color="#93CCEC")
+        self.data_vol.place(x=45, y=0)
+
+        self.label4 = customtkinter.CTkLabel(master=self.inner_vol, text="m3",
+                                            font=("Poppins", 10), text_color="#006495")
+        self.label4.place(x=94, y=4)
+
+        # ====== POPULATION =====
+        self.text5 = customtkinter.CTkLabel(master=self.manual_frame,
+                                            text="Population",
+                                            font=("Poppins", 12), text_color="#006495")
+        self.text5.place(x=0, y=266)
+        
+        self.inner_plant = customtkinter.CTkFrame(master=self.manual_frame, width=151, height=45, fg_color="#E1F8FF")
+        self.inner_plant.place(x=130, y=255)
+
+        self.data_plant = customtkinter.CTkEntry(master=self.inner_plant, width=132, height=44, fg_color="#E1F8FF", 
+                                            text_color="#006495", border_color="#E1F8FF",font=("Poppins", 20, "bold"), 
+                                            placeholder_text="00", placeholder_text_color="#93CCEC", justify="center")
+        self.data_plant.place(x=0, y=0)
+        # ===== End Frame Manual =====
+        
         #============================================ End Input Frame ============================================
 
         #============================================ Start Frame Control ============================================
