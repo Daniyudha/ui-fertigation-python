@@ -1,10 +1,18 @@
-import customtkinter
+import customtkinter,time
 from utils.clear_frame import clear_frame
 from PIL import Image
 from database.connection.db_connection import Db_connection
 from database.db_table import Db_table
 from database.db_product import Db_product
 from database.db_preset import Db_preset
+# from hardware.light_intensity import lightSensorReader
+from hardware.Temperature import read_dht_sensor
+from hardware.Rain_intensity import rainSensor
+from hardware.ph import pHSensor
+# from hardware.water_flow import flowSensor
+from hardware.light_flow import light_flowSensor
+from hardware.serial_read import SerialReader
+import threading
 
 class Ui_home:
     def __init__(self, username: str, root: customtkinter.CTk, square_frame: customtkinter.CTk):
@@ -12,11 +20,133 @@ class Ui_home:
         self.root = root
         self.square_frame = square_frame
         self.root.unbind("<Return>")
-
+        
+        
+        # Inisialisasi Sensor Reader     
+        # self.light_reader = lightSensorReader()
+        # self.light_reader.start_reading()
+        self.rain_reader = rainSensor()
+        self.pH_reader = pHSensor()
+        # self.flow_reader = flowSensor(pins=[6, 12, 21, 27])
+        self.light_flow_reader = light_flowSensor()
+        self.light_flow_reader.start()
+        
+        self.water_soil = SerialReader(port="/dev/serial0", baudrate=9600)
+        self.water_soil.start_reading()
+        
         clear_frame(self.square_frame)
         self.ui_images()
         self.ui_widgets()
         self.manual_frame.place_forget()
+        
+        # self.update_lightSensor()
+        self.update_temperature()
+        self.update_rainSensor()
+        self.update_pHSensor()
+        self.update_light_flowSensor()
+        self.update_water_soil()
+        # self.update_flowSensor()
+        # self.run()
+        
+
+
+    # def update_flowSensor(self):
+    #     flow1 = self.flow_reader.get_average_flow_rate(0)
+    #     flow2 = self.flow_reader.get_average_flow_rate(1)
+    #     flow3 = self.flow_reader.get_average_flow_rate(2)
+    #     flow4 = self.flow_reader.get_average_flow_rate(3)
+        
+    #     self.flow1Value.configure(text=f"{flow1:.1f}")
+    #     self.flow2Value.configure(text=f"{flow2:.1f}")
+    #     self.flow3Value.configure(text=f"{flow3:.1f}")
+    #     self.flow4Value.configure(text=f"{flow4:.1f}")
+        
+    #     self.root.after(1000, self.update_flowSensor)
+    
+    def update_water_soil(self):
+        data = self.water_soil.get_data()
+
+        ec_air = data.get("ec_air", "Menunggu data...")
+        ph = data.get("ph", "Menunggu data...")
+        kelembaban = data.get("kelembaban", "Menunggu data...")
+
+
+        # Perbarui label
+        self.waterECValue.configure(text=f"EC: {ec_air}")
+        self.soilpHValue.configure(text=f"pH: {ph}")
+        self.soilHumValue.configure(text=f"Kelembaban: {kelembaban}")
+
+        # Jadwalkan pembaruan berikutnya
+        self.root.after(1000, self.update_water_soil)
+        
+    def stop_program(self):
+        """Hentikan program."""
+        self.water_soil.stop_reading()
+        self.root.destroy()
+        
+    
+    def update_light_flowSensor(self):
+        lux = self.light_flow_reader.last_lux
+        # category = self.light_flow_reader.last_light_category
+        flow_rates = self.light_flow_reader.flow_rates
+        print(flow_rates[0])
+        
+        self.lightValue.configure(text=f"{lux:.1f}")
+        self.flow1Value.configure(text=f"{flow_rates[0]:.1f}")
+        self.flow2Value.configure(text=f"{flow_rates[1]:.1f}")
+        self.flow3Value.configure(text=f"{flow_rates[2]:.1f}")
+        self.flow4Value.configure(text=f"{flow_rates[3]:.1f}")
+        # self.category_label.configure(text=category)
+        # self.flow1Value.configure(text=f"s{flow_rates:.1f}")
+        # for i, rate in enumerate(flow_rates):
+        #         print(f"Flow Sensor {i + 1}: {rate:.2f} LPM")
+        self.root.after(1000, self.update_light_flowSensor)
+    
+    def update_pHSensor(self):
+        voltage, ph_value, ph_classification = self.pH_reader.get_ph_data(channel=0)
+        self.waterpHValue.configure(text=f"{ph_value:.1f}")
+        self.root.after(1000, self.update_pHSensor)
+
+    def update_rainSensor(self):
+        voltage, rain_intensity, rain_classification = self.rain_reader.get_rain_data(channel=1)
+        # self.voltage_label.configure(text=f"Tegangan: {voltage:.2f} V")
+        self.rainValue.configure(text=f"{rain_intensity:.1f}")
+        # self.classification_label.configure(text=f"Klasifikasi: {rain_classification}")
+        self.root.after(1000, self.update_rainSensor)
+    
+    def update_temperature(self):
+        temperature, humidity = read_dht_sensor()
+        if temperature is not None:
+            self.tempValue.configure(text=f"{temperature:.1f}")
+        else:
+            self.tempValue.configure(text="N/A")  # Tampilkan "N/A" jika gagal membaca sensor
+            
+        if humidity is not None:
+            self.humValue.configure(text=f"{humidity:.1f}")
+        else:
+            self.humValue.configure(text="N/A")
+
+        # Panggil fungsi ini lagi setelah 1000 ms (1 detik)
+        self.root.after(1000, self.update_temperature)
+        
+    # def update_lightSensor(self):
+    #     light_value = self.light_reader.last_lux  
+    #     self.lightData.configure(text=f"{light_value:.1f}")  # Perbarui label dengan nilai lux
+    #     # print(f"Lux: {light_value:.2f}")
+        
+    #     # Panggil ulang fungsi ini setiap 1000 ms (1 detik)
+    #     self.root.after(1000, self.update_lightSensor)
+    
+    def on_closing(self):
+        # Hentikan pembacaan sensor sebelum menutup aplikasi
+        # self.light_reader.stop_reading()
+        self.rainData.close()  # Tutup koneksi SPI saat aplikasi ditutup
+        self.destroy()
+    
+    def run(self):
+        while True:
+            self.update_lightSensor()
+            time.sleep(1)
 
     def ui_images(self):
         # https://pixabay.com/vectors/it-business-icons-computers-722950/
@@ -104,10 +234,10 @@ class Ui_home:
                                                             text_color="#ffffff")
         self.water_frame_text1.place(x=108, y=35)
 
-        self.water_frame_data1 = customtkinter.CTkLabel(master=self.water_frame,
-                                                        text="8.5", font=("Poppins", 20, "bold"),
+        self.waterECValue = customtkinter.CTkLabel(master=self.water_frame,
+                                                        text="0", font=("Poppins", 20, "bold"),
                                                         text_color="#ffffff", justify='right')
-        self.water_frame_data1.place(x=148, y=33)
+        self.waterECValue.place(x=148, y=33)
 
         self.water_frame_label1 = customtkinter.CTkLabel(master=self.water_frame,
                                                         text="ms/cm", font=("Poppins", 10),
@@ -120,10 +250,10 @@ class Ui_home:
                                                             text_color="#ffffff")
         self.water_frame_text2.place(x=108, y=82)
 
-        self.water_frame_data2 = customtkinter.CTkLabel(master=self.water_frame,
+        self.waterpHValue = customtkinter.CTkLabel(master=self.water_frame,
                                                         text="0", font=("Poppins", 20, "bold"),
                                                         text_color="#ffffff", justify='right')
-        self.water_frame_data2.place(x=148, y=81)
+        self.waterpHValue.place(x=148, y=81)
 
         
         # ===== FLOW =====
@@ -159,10 +289,10 @@ class Ui_home:
                                                             text_color="#ffffff")
         self.soil_frame_text1.place(x=108, y=35)
 
-        self.soil_frame_data1 = customtkinter.CTkLabel(master=self.soil_frame,
-                                                        text="0.6", font=("Poppins", 20, "bold"),
+        self.soilECValue = customtkinter.CTkLabel(master=self.soil_frame,
+                                                        text="0", font=("Poppins", 20, "bold"),
                                                         text_color="#ffffff", justify='right')
-        self.soil_frame_data1.place(x=148, y=33)
+        self.soilECValue.place(x=148, y=33)
 
         self.soil_frame_label1 = customtkinter.CTkLabel(master=self.soil_frame,
                                                         text="ms/cm", font=("Poppins", 10),
@@ -175,10 +305,10 @@ class Ui_home:
                                                             text_color="#ffffff")
         self.soil_frame_text2.place(x=108, y=82)
 
-        self.soil_frame_data2 = customtkinter.CTkLabel(master=self.soil_frame,
+        self.soilpHValue = customtkinter.CTkLabel(master=self.soil_frame,
                                                         text="0", font=("Poppins", 20, "bold"),
                                                         text_color="#ffffff", justify='right')
-        self.soil_frame_data2.place(x=148, y=81)
+        self.soilpHValue.place(x=148, y=81)
 
         
         # ===== HUMIDITY =====
@@ -187,10 +317,10 @@ class Ui_home:
                                                             text_color="#ffffff")
         self.soil_frame_text3.place(x=108, y=127)
 
-        self.soil_frame_data3 = customtkinter.CTkLabel(master=self.soil_frame,
-                                                        text="60", font=("Poppins", 20, "bold"),
+        self.soilHumValue = customtkinter.CTkLabel(master=self.soil_frame,
+                                                        text="0", font=("Poppins", 20, "bold"),
                                                         text_color="#ffffff", justify='right')
-        self.soil_frame_data3.place(x=148, y=126)
+        self.soilHumValue.place(x=148, y=126)
 
         self.soil_frame_label3 = customtkinter.CTkLabel(master=self.soil_frame,
                                                         text="%", font=("Poppins", 10),
@@ -215,13 +345,13 @@ class Ui_home:
                                             font=("Poppins", 10), text_color="#006495")
         self.text1.place(x=35, y=63)
 
-        self.data1 = customtkinter.CTkLabel(master=self.flow_frame,
+        self.flow1Value = customtkinter.CTkLabel(master=self.flow_frame,
                                             text="0",
                                             font=("Poppins", 16, "bold"), text_color="#006495")
-        self.data1.place(x=146, y=60)
+        self.flow1Value.place(x=146, y=60)
 
         self.label1 = customtkinter.CTkLabel(master=self.flow_frame,
-                                                text="%",
+                                                text="LPM",
                                                 font=("Poppins", 10), text_color="#006495")
         self.label1.place(x=186, y=58)
         
@@ -231,13 +361,13 @@ class Ui_home:
                                             font=("Poppins", 10), text_color="#006495")
         self.text1.place(x=35, y=113)
 
-        self.data1 = customtkinter.CTkLabel(master=self.flow_frame,
+        self.flow2Value = customtkinter.CTkLabel(master=self.flow_frame,
                                             text="0",
                                             font=("Poppins", 16, "bold"), text_color="#006495")
-        self.data1.place(x=146, y=111)
+        self.flow2Value.place(x=146, y=111)
 
         self.label1 = customtkinter.CTkLabel(master=self.flow_frame,
-                                                text="%",
+                                                text="LPM",
                                                 font=("Poppins", 10), text_color="#006495")
         self.label1.place(x=186, y=109)
         
@@ -247,13 +377,13 @@ class Ui_home:
                                             font=("Poppins", 10), text_color="#006495")
         self.text1.place(x=35, y=164)
 
-        self.data1 = customtkinter.CTkLabel(master=self.flow_frame,
+        self.flow3Value = customtkinter.CTkLabel(master=self.flow_frame,
                                             text="0",
                                             font=("Poppins", 16, "bold"), text_color="#006495")
-        self.data1.place(x=146, y=163)
+        self.flow3Value.place(x=146, y=163)
 
         self.label1 = customtkinter.CTkLabel(master=self.flow_frame,
-                                                text="%",
+                                                text="LPM",
                                                 font=("Poppins", 10), text_color="#006495")
         self.label1.place(x=186, y=161)
         
@@ -263,13 +393,13 @@ class Ui_home:
                                             font=("Poppins", 10), text_color="#006495")
         self.text1.place(x=35, y=216)
 
-        self.data1 = customtkinter.CTkLabel(master=self.flow_frame,
+        self.flow4Value = customtkinter.CTkLabel(master=self.flow_frame,
                                             text="0",
                                             font=("Poppins", 16, "bold"), text_color="#006495")
-        self.data1.place(x=146, y=215)
+        self.flow4Value.place(x=146, y=215)
 
         self.label1 = customtkinter.CTkLabel(master=self.flow_frame,
-                                                text="%",
+                                                text="LPM",
                                                 font=("Poppins", 10), text_color="#006495")
         self.label1.place(x=186, y=213)
         #============================================ End Flow Frame ============================================
@@ -291,10 +421,10 @@ class Ui_home:
                                             font=("Poppins", 10), text_color="#006495")
         self.text1.place(x=35, y=63)
 
-        self.data1 = customtkinter.CTkLabel(master=self.weather_frame,
+        self.rainValue = customtkinter.CTkLabel(master=self.weather_frame,
                                             text="0",
-                                            font=("Poppins", 16, "bold"), text_color="#006495")
-        self.data1.place(x=146, y=60)
+                                            font=("Poppins", 16, "bold"), text_color="#006495", justify="right")
+        self.rainValue.place(x=120, y=60)
 
         self.label1 = customtkinter.CTkLabel(master=self.weather_frame,
                                                 text="mm",
@@ -307,10 +437,10 @@ class Ui_home:
                                             font=("Poppins", 10), text_color="#006495")
         self.text2.place(x=35, y=113)
 
-        self.data2 = customtkinter.CTkLabel(master=self.weather_frame,
-                                            text="0",
-                                            font=("Poppins", 16, "bold"), text_color="#006495")
-        self.data2.place(x=146, y=111)
+        self.lightValue = customtkinter.CTkLabel(master=self.weather_frame,
+                                            text="0", 
+                                            font=("Poppins", 16, "bold"), text_color="#006495", justify="center")
+        self.lightValue.place(x=120, y=111)
 
         self.label2 = customtkinter.CTkLabel(master=self.weather_frame,
                                                 text="lux",
@@ -323,10 +453,10 @@ class Ui_home:
                                             font=("Poppins", 10), text_color="#006495")
         self.text3.place(x=35, y=164)
 
-        self.data3 = customtkinter.CTkLabel(master=self.weather_frame,
+        self.tempValue = customtkinter.CTkLabel(master=self.weather_frame,
                                             text="0",
-                                            font=("Poppins", 16, "bold"), text_color="#006495")
-        self.data3.place(x=146, y=163)
+                                            font=("Poppins", 16, "bold"), text_color="#006495", justify="center")
+        self.tempValue.place(x=120, y=163)
 
         self.label3 = customtkinter.CTkLabel(master=self.weather_frame,
                                                 text="C",
@@ -339,10 +469,10 @@ class Ui_home:
                                             font=("Poppins", 10), text_color="#006495")
         self.text4.place(x=35, y=216)
 
-        self.data4 = customtkinter.CTkLabel(master=self.weather_frame,
-                                            text="0",
+        self.humValue = customtkinter.CTkLabel(master=self.weather_frame,
+                                            text= "0",
                                             font=("Poppins", 16, "bold"), text_color="#006495")
-        self.data4.place(x=146, y=215)
+        self.humValue.place(x=120, y=215)
 
         self.label4 = customtkinter.CTkLabel(master=self.weather_frame,
                                                 text="%",
@@ -662,6 +792,16 @@ class Ui_home:
             # Show Input Frame 1 and hide Input Frame 2
             self.manual_frame.place_forget()
             self.auto_frame.place(x=30, y=55)
+            
+    def stop_binding_return(self):
+        self.root.unbind("<Return>")
+        
+# root = customtkinter.CTk
+# square_frame = customtkinter.CTk
+# sensor = Ui_home(username= str, root = root , square_frame= square_frame)
+# sensor.update_sensor_value
+
+# root.after(5000, sensor.stop_binding_return)
 
 class NumericCTkEntry(customtkinter.CTkEntry):
     def __init__(self, master=None, **kwargs):
