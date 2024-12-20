@@ -1,6 +1,7 @@
 import customtkinter
 from PIL import Image
 from ui.ui_home import Ui_home
+from ui.ui_sensor import Ui_sensor
 from ui.ui_account import Ui_account
 from ui.ui_product import Ui_product
 from ui.ui_customer import Ui_customer
@@ -54,10 +55,10 @@ class Ui_panel:
 
     def ui_images(self):
         # https://pixabay.com/vectors/fast-food-meal-cartoon-face-smile-7040523/
-        self.pizzapil_image = Image.open("images/global_images/pizza.png")
-        self.pizza_image = customtkinter.CTkImage(dark_image=self.pizzapil_image,
-                                                  light_image=self.pizzapil_image, 
-                                                  size=(80, 80))
+        # self.pizzapil_image = Image.open("images/global_images/pizza.png")
+        # self.pizza_image = customtkinter.CTkImage(dark_image=self.pizzapil_image,
+        #                                           light_image=self.pizzapil_image, 
+        #                                           size=(80, 80))
         
         # for logo icon
         self.logo = Image.open("images/home_images/rac-logo.png")
@@ -70,6 +71,13 @@ class Ui_panel:
         self.home_icon = customtkinter.CTkImage(dark_image=self.home_icon,
                                                   light_image=self.home_icon, 
                                                   size=(35, 29))
+        
+        # for sensor icon
+        self.sensor_icon = Image.open("images/home_images/sensor-btn.png")
+        self.sensor_icon = customtkinter.CTkImage(dark_image=self.sensor_icon,
+                                                  light_image=self.sensor_icon, 
+                                                  size=(35, 29))
+        
         # for report icon
         self.report_icon = Image.open("images/home_images/report-btn.png")
         self.report_icon = customtkinter.CTkImage(dark_image=self.report_icon,
@@ -109,7 +117,18 @@ class Ui_panel:
                                                    image=self.home_icon,
                                                    font=("arial", 17),
                                                    command=self.home_interface)
-        self.home_button.place(x=10, y=142.5)
+        self.home_button.place(x=10, y=106.5)
+        
+        self.sensor_button = customtkinter.CTkButton(master=self.sidebar_frame,
+                                                   width=40, height=60,
+                                                   corner_radius=5, 
+                                                   fg_color="#ffffff",
+                                                   hover_color="#E1F8FF",
+                                                   text=None,
+                                                   image=self.sensor_icon,
+                                                   font=("arial", 17),
+                                                   command=self.sensor_interface)
+        self.sensor_button.place(x=10, y=181.5)
 
         self.customer_button = customtkinter.CTkButton(master=self.sidebar_frame,
                                                        width=40, height=60,
@@ -120,7 +139,7 @@ class Ui_panel:
                                                        image=self.report_icon,
                                                        font=("arial", 17),
                                                        command=self.customer_interface)
-        self.customer_button.place(x=10, y=214.5)
+        self.customer_button.place(x=10, y=256.5)
 
         self.waiter_button = customtkinter.CTkButton(master=self.sidebar_frame,
                                                      width=40, height=60,
@@ -131,7 +150,7 @@ class Ui_panel:
                                                      image=self.tools_icon,
                                                      font=("arial", 17),
                                                      command=self.waiter_interface)
-        self.waiter_button.place(x=10, y=286.5)
+        self.waiter_button.place(x=10, y=331.5)
 
         # self.category_button = customtkinter.CTkButton(master=self.sidebar_frame,
         #                                                width=50, height=50,
@@ -173,7 +192,7 @@ class Ui_panel:
                                                       image=self.account_icon,
                                                       font=("arial", 17),
                                                       command=self.account_interface)
-        self.account_button.place(x=10, y=358.5)
+        self.account_button.place(x=10, y=405.5)
 
         
         self.version = customtkinter.CTkLabel(master=self.sidebar_frame,
@@ -184,6 +203,10 @@ class Ui_panel:
     def home_interface(self):
         Ui_home(username=self.__username, root=self.root, square_frame=self.square_frame)
         self.button_selected(target_button=self.home_button)
+    
+    def sensor_interface(self):
+        Ui_sensor(username=self.__username, root=self.root, square_frame=self.square_frame)
+        self.button_selected(target_button=self.sensor_button)
 
     def customer_interface(self):
         Ui_customer(username=self.__username, root=self.root, square_frame=self.square_frame)

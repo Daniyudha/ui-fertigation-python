@@ -11,8 +11,8 @@ class Ui(customtkinter.CTk):
         # https://pixabay.com/vectors/burgers-bread-food-cheese-1435094/
         # self.iconbitmap("images/global_images/icon.ico")
         self.title("Testing UI For Smart Fertigation System")
-        # self.geometry("1024x600")
-        self.attributes('-fullscreen', True)
+        self.geometry("1024x600")
+        # self.attributes('-fullscreen', True)
         self.resizable(False, False)
         customtkinter.set_appearance_mode("light")
         self.attributes("-topmost", True)

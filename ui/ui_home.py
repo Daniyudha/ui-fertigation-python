@@ -12,6 +12,7 @@ from hardware.ph import pHSensor
 # from hardware.water_flow import flowSensor
 from hardware.light_flow import light_flowSensor
 from hardware.serial_read import SerialReader
+from hardware.Pressure import PressureSensor
 import threading
 
 class Ui_home:
@@ -27,11 +28,13 @@ class Ui_home:
         # self.light_reader.start_reading()
         self.rain_reader = rainSensor()
         self.pH_reader = pHSensor()
+        self.pressure_reader = PressureSensor()
         # self.flow_reader = flowSensor(pins=[6, 12, 21, 27])
         self.light_flow_reader = light_flowSensor()
         self.light_flow_reader.start()
         
         self.water_soil = SerialReader(port="/dev/serial0", baudrate=9600)
+        self.water_soil.connect()
         self.water_soil.start_reading()
         
         clear_frame(self.square_frame)
@@ -45,36 +48,39 @@ class Ui_home:
         self.update_pHSensor()
         self.update_light_flowSensor()
         self.update_water_soil()
+        self.update_pressure_sensor()
         # self.update_flowSensor()
         # self.run()
         
 
 
-    # def update_flowSensor(self):
-    #     flow1 = self.flow_reader.get_average_flow_rate(0)
-    #     flow2 = self.flow_reader.get_average_flow_rate(1)
-    #     flow3 = self.flow_reader.get_average_flow_rate(2)
-    #     flow4 = self.flow_reader.get_average_flow_rate(3)
-        
-    #     self.flow1Value.configure(text=f"{flow1:.1f}")
-    #     self.flow2Value.configure(text=f"{flow2:.1f}")
-    #     self.flow3Value.configure(text=f"{flow3:.1f}")
-    #     self.flow4Value.configure(text=f"{flow4:.1f}")
-        
-    #     self.root.after(1000, self.update_flowSensor)
+    def update_pressure_sensor(self):
+        # Ambil data dari sensor tekanan
+        pressure = self.pressure_reader.get_pressure(channel=2)
+
+        # Perbarui label UI
+        self.voltage_label.configure(text=f"Voltage: {pressure['voltage']:.2f} V")
+        self.adc_label.configure(text=f"ADC: {pressure['adc']}")
+        self.pressureValue.configure(text=f"Pressure: {pressure['pressure']:.1f}")
+
+        # Jadwalkan pembaruan berikutnya
+        self.root.after(1000, self.update_pressure_sensor)
+
     
     def update_water_soil(self):
         data = self.water_soil.get_data()
 
-        ec_air = data.get("ec_air", "Menunggu data...")
-        ph = data.get("ph", "Menunggu data...")
-        kelembaban = data.get("kelembaban", "Menunggu data...")
+        ec_air = data.get("EC_Air", "waiting...")
+        ec_tanah = data["Soil1"].get("Konduktivitas", "waiting...")
+        ph_tanah = data["Soil1"].get("pH", "waiting...")
+        kelembaban_tanah = data["Soil1"].get("Kelembaban", "waiting...")
 
 
         # Perbarui label
-        self.waterECValue.configure(text=f"EC: {ec_air}")
-        self.soilpHValue.configure(text=f"pH: {ph}")
-        self.soilHumValue.configure(text=f"Kelembaban: {kelembaban}")
+        self.waterECValue.configure(text=f"{ec_air}")
+        self.soilECValue.configure(text=f"{ec_tanah}")
+        self.soilpHValue.configure(text=f"{ph_tanah}")
+        self.soilHumValue.configure(text=f"{kelembaban_tanah}")
 
         # Jadwalkan pembaruan berikutnya
         self.root.after(1000, self.update_water_soil)
@@ -150,14 +156,14 @@ class Ui_home:
 
     def ui_images(self):
         # https://pixabay.com/vectors/it-business-icons-computers-722950/
-        self.air_image = Image.open("images/home_images/water.png")
-        self.air_image = customtkinter.CTkImage(dark_image=self.air_image,
-                                                    light_image=self.air_image, 
+        self.water_image = Image.open("images/home_images/water.png")
+        self.water_image = customtkinter.CTkImage(dark_image=self.water_image,
+                                                    light_image=self.water_image, 
                                                     size=(80, 107))
         
-        self.tanah_image = Image.open("images/home_images/soil.png")
-        self.tanah_image = customtkinter.CTkImage(dark_image=self.tanah_image,
-                                                    light_image=self.tanah_image, 
+        self.soil_image = Image.open("images/home_images/soil.png")
+        self.soil_image = customtkinter.CTkImage(dark_image=self.soil_image,
+                                                    light_image=self.soil_image, 
                                                     size=(80, 107))
         
         self.categorypil_image = Image.open("images/home_images/category.png")
@@ -225,7 +231,7 @@ class Ui_home:
                                                 fg_color="#006495")
         self.water_frame.place(x=14, y=0)
 
-        self.waterimage_label = customtkinter.CTkLabel(master=self.water_frame, text=None, image=self.air_image)
+        self.waterimage_label = customtkinter.CTkLabel(master=self.water_frame, text=None, image=self.water_image)
         self.waterimage_label.place(x=20, y=41)
 
         # ===== EC =====
@@ -235,9 +241,9 @@ class Ui_home:
         self.water_frame_text1.place(x=108, y=35)
 
         self.waterECValue = customtkinter.CTkLabel(master=self.water_frame,
-                                                        text="0", font=("Poppins", 20, "bold"),
+                                                        text="0", font=("Poppins", 18, "bold"),
                                                         text_color="#ffffff", justify='right')
-        self.waterECValue.place(x=148, y=33)
+        self.waterECValue.place(x=140, y=33)
 
         self.water_frame_label1 = customtkinter.CTkLabel(master=self.water_frame,
                                                         text="ms/cm", font=("Poppins", 10),
@@ -251,26 +257,26 @@ class Ui_home:
         self.water_frame_text2.place(x=108, y=82)
 
         self.waterpHValue = customtkinter.CTkLabel(master=self.water_frame,
-                                                        text="0", font=("Poppins", 20, "bold"),
+                                                        text="0", font=("Poppins", 18, "bold"),
                                                         text_color="#ffffff", justify='right')
-        self.waterpHValue.place(x=148, y=81)
+        self.waterpHValue.place(x=140, y=81)
 
         
-        # ===== FLOW =====
+        # ===== PRESSURE =====
         self.water_frame_text3 = customtkinter.CTkLabel(master=self.water_frame,
-                                                            text="Flow", font=("Poppins", 10, "bold"),
+                                                            text="Pressure", font=("Poppins", 10, "bold"),
                                                             text_color="#ffffff")
         self.water_frame_text3.place(x=108, y=127)
 
-        self.water_frame_data3 = customtkinter.CTkLabel(master=self.water_frame,
-                                                        text="0", font=("Poppins", 20, "bold"),
+        self.pressureValue = customtkinter.CTkLabel(master=self.water_frame,
+                                                        text="0", font=("Poppins", 18, "bold"),
                                                         text_color="#ffffff", justify='right')
-        self.water_frame_data3.place(x=148, y=126)
+        self.pressureValue.place(x=165, y=126)
 
         self.water_frame_label3 = customtkinter.CTkLabel(master=self.water_frame,
-                                                        text="l/s", font=("Poppins", 10),
+                                                        text="bar", font=("Poppins", 10),
                                                         text_color="#ffffff")
-        self.water_frame_label3.place(x=190, y=123)
+        self.water_frame_label3.place(x=200, y=123)
         #============================================ End Water Frame ============================================
 
         #============================================ Start Soil Frame ============================================
@@ -280,7 +286,7 @@ class Ui_home:
                                                 fg_color="#B17E5B")
         self.soil_frame.place(x=284, y=0)
 
-        self.soilimage_label = customtkinter.CTkLabel(master=self.soil_frame, text=None, image=self.tanah_image)
+        self.soilimage_label = customtkinter.CTkLabel(master=self.soil_frame, text=None, image=self.soil_image)
         self.soilimage_label.place(x=20, y=41)
 
         # ===== EC =====
@@ -290,7 +296,7 @@ class Ui_home:
         self.soil_frame_text1.place(x=108, y=35)
 
         self.soilECValue = customtkinter.CTkLabel(master=self.soil_frame,
-                                                        text="0", font=("Poppins", 20, "bold"),
+                                                        text="0", font=("Poppins", 18, "bold"),
                                                         text_color="#ffffff", justify='right')
         self.soilECValue.place(x=148, y=33)
 
@@ -306,26 +312,26 @@ class Ui_home:
         self.soil_frame_text2.place(x=108, y=82)
 
         self.soilpHValue = customtkinter.CTkLabel(master=self.soil_frame,
-                                                        text="0", font=("Poppins", 20, "bold"),
+                                                        text="0", font=("Poppins", 18, "bold"),
                                                         text_color="#ffffff", justify='right')
         self.soilpHValue.place(x=148, y=81)
 
         
         # ===== HUMIDITY =====
         self.soil_frame_text3 = customtkinter.CTkLabel(master=self.soil_frame,
-                                                            text="Flow", font=("Poppins", 10, "bold"),
+                                                            text="Moisture", font=("Poppins", 10, "bold"),
                                                             text_color="#ffffff")
         self.soil_frame_text3.place(x=108, y=127)
 
         self.soilHumValue = customtkinter.CTkLabel(master=self.soil_frame,
-                                                        text="0", font=("Poppins", 20, "bold"),
+                                                        text="0", font=("Poppins", 18, "bold"),
                                                         text_color="#ffffff", justify='right')
-        self.soilHumValue.place(x=148, y=126)
+        self.soilHumValue.place(x=165, y=126)
 
         self.soil_frame_label3 = customtkinter.CTkLabel(master=self.soil_frame,
                                                         text="%", font=("Poppins", 10),
                                                         text_color="#ffffff")
-        self.soil_frame_label3.place(x=190, y=123)
+        self.soil_frame_label3.place(x=210, y=123)
         #============================================ End Soil Frame ============================================
 
         #============================================ Start Flow Frame ============================================
