@@ -70,17 +70,35 @@ class Ui_home:
     def update_water_soil(self):
         data = self.water_soil.get_data()
 
+        # water
         ec_air = data.get("EC_Air", "waiting...")
-        ec_tanah = data["Soil1"].get("Konduktivitas", "waiting...")
-        ph_tanah = data["Soil1"].get("pH", "waiting...")
-        kelembaban_tanah = data["Soil1"].get("Kelembaban", "waiting...")
+        
+        # soil 1
+        hum_tanah_1 = data["Soil1"].get("Kelembaban", "waiting...")
+        temp_tanah_1 = data["Soil1"].get("Suhu", "waiting...")
+        ec_tanah_1 = data["Soil1"].get("Konduktivitas", "waiting...")
+        ph_tanah_1 = data["Soil1"].get("pH", "waiting...")
+        nitro_1 = data["Soil1"].get("Nitrogen", "waiting...")
+        fosfor_1 = data["Soil1"].get("Fosfor", "waiting...")
+        kalium_1 = data["Soil1"].get("Kalium", "waiting...")
+        
+        # soil 2
+        hum_tanah_2 = data["Soil1"].get("Kelembaban", "waiting...")
+        temp_tanah_2 = data["Soil1"].get("Suhu", "waiting...")
+        ec_tanah_2 = data["Soil1"].get("Konduktivitas", "waiting...")
+        ph_tanah_2 = data["Soil1"].get("pH", "waiting...")
+        nitro_2 = data["Soil1"].get("Nitrogen", "waiting...")
+        fosfor_2 = data["Soil1"].get("Fosfor", "waiting...")
+        kalium_2 = data["Soil1"].get("Kalium", "waiting...")
 
 
         # Perbarui label
         self.waterECValue.configure(text=f"{ec_air}")
-        self.soilECValue.configure(text=f"{ec_tanah}")
-        self.soilpHValue.configure(text=f"{ph_tanah}")
-        self.soilHumValue.configure(text=f"{kelembaban_tanah}")
+        
+        # update ui sensor
+        self.soilHumValue.configure(text=f"{hum_tanah_1}")
+        self.soilECValue.configure(text=f"{ec_tanah_1}")
+        self.soilpHValue.configure(text=f"{ph_tanah_1}")
 
         # Jadwalkan pembaruan berikutnya
         self.root.after(1000, self.update_water_soil)
