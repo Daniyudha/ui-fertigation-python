@@ -52,8 +52,6 @@ class Ui_home:
         # self.update_flowSensor()
         # self.run()
         
-
-
     def update_pressure_sensor(self):
         # Ambil data dari sensor tekanan
         pressure = self.pressure_reader.get_pressure(channel=2)
@@ -65,7 +63,6 @@ class Ui_home:
 
         # Jadwalkan pembaruan berikutnya
         self.root.after(1000, self.update_pressure_sensor)
-
     
     def update_water_soil(self):
         data = self.water_soil.get_data()

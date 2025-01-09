@@ -1,12 +1,14 @@
 from database.connection.db_connection import Db_connection
 from tkinter import messagebox
 from utils.log import log
+from ui.ui_home import Ui_home
 
 class DbSensor(Db_connection):
     def __init__(self, username):
         super().__init__()
         self.__username = username
         self.db_connected()
+        self.data_sensor = Ui_home()
 
     def save_sensor_data(self, data: dict):
         """
@@ -50,7 +52,7 @@ class DbSensor(Db_connection):
                 water_ph, water_ec,
                 soil_1_hum, soil_1_temp, soil_1_ec, soil_1_ph, soil_1_nitro, soil_1_fosfor, soil_1_kalium,
                 soil_2_hum, soil_2_temp, soil_2_ec, soil_2_ph, soil_2_nitro, soil_2_fosfor, soil_2_kalium
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)
             """
             
             # Data yang akan dimasukkan
