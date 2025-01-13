@@ -52,7 +52,7 @@ class DbSensor(Db_connection):
                 water_ph, water_ec,
                 soil_1_hum, soil_1_temp, soil_1_ec, soil_1_ph, soil_1_nitro, soil_1_fosfor, soil_1_kalium,
                 soil_2_hum, soil_2_temp, soil_2_ec, soil_2_ph, soil_2_nitro, soil_2_fosfor, soil_2_kalium
-            ) VALUES (%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             
             # Data yang akan dimasukkan
@@ -80,3 +80,43 @@ class DbSensor(Db_connection):
             # Menutup koneksi
             self.cursor.close()
             self.mysql_connection.close()
+
+if __name__ == "__main__":
+    # Data dummy untuk pengujian
+    dummy_data = {
+        "air_temp": 25.5,
+        "air_hum": 60.2,
+        "light_int": 450.0,
+        "rain_int": 0.0,
+        "flow_1": 1.2,
+        "flow_2": 1.1,
+        "flow_3": 0.9,
+        "flow_4": 1.3,
+        "water_ph": 6.8,
+        "water_ec": 1.5,
+        "soil_1_hum": 25.0,
+        "soil_1_temp": 24.5,
+        "soil_1_ec": 0.8,
+        "soil_1_ph": 6.5,
+        "soil_1_nitro": 50.0,
+        "soil_1_fosfor": 30.0,
+        "soil_1_kalium": 40.0,
+        "soil_2_hum": 22.5,
+        "soil_2_temp": 23.8,
+        "soil_2_ec": 0.7,
+        "soil_2_ph": 6.4,
+        "soil_2_nitro": 48.0,
+        "soil_2_fosfor": 28.0,
+        "soil_2_kalium": 35.0,
+    }
+
+    # Nama pengguna
+    username = "test"
+
+    # Inisialisasi kelas DbSensor
+    sensor_db = DbSensor(username=username)
+
+    # Menyimpan data dummy ke database
+    sensor_db.save_sensor_data(dummy_data)
+
+    print("Data dummy berhasil disimpan (jika tidak ada error).")
