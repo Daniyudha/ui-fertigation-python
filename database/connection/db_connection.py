@@ -72,3 +72,20 @@ class Db_connection:
         finally:
             if mysql_connection is not None:
                 mysql_connection.close()
+                
+    def fetch_presets(self):
+        """
+        Mengambil data nama preset dari tabel presets.
+        """
+        try:
+            self.db_connected()  # Pastikan koneksi aktif
+            query = "SELECT name FROM presets"
+            self.cursor.execute(query)
+            results = [row[0] for row in self.cursor.fetchall()]  # Ambil semua nama preset
+            return results
+        except Exception as e:
+            print(f"Error fetching presets: {e}")
+            return []
+        finally:
+            self.cursor.close()
+            self.mysql_connection.close()

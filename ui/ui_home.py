@@ -2,8 +2,6 @@ import customtkinter,time
 from utils.clear_frame import clear_frame
 from PIL import Image
 from database.connection.db_connection import Db_connection
-from database.db_table import Db_table
-from database.db_product import Db_product
 from database.db_preset import Db_preset
 # from hardware.light_intensity import lightSensorReader
 from hardware.Temperature import read_dht_sensor
@@ -229,13 +227,13 @@ class Ui_home:
 
 #################################################################################
 
-        table_info = Db_table(self.__username).read_table()
-        table_unoccupied = table_occupied = 0
-        for i in table_info:
-            if i[1]:
-                table_occupied += 1
-            else:
-                table_unoccupied += 1
+        # table_info = Db_table(self.__username).read_table()
+        # table_unoccupied = table_occupied = 0
+        # for i in table_info:
+        #     if i[1]:
+        #         table_occupied += 1
+        #     else:
+        #         table_unoccupied += 1
 
 #################################################################################
 
@@ -517,11 +515,6 @@ class Ui_home:
         self.button_label.place(x=211, y=17)
         
         self.switch_var = customtkinter.StringVar(value="off")
-        # self.switch = customtkinter.CTkSwitch(master=self.input, width=55, height=29, switch_width=52, switch_height=27,
-        #                                       border_color="#006495", fg_color="#ffffff",
-        #                                       border_width=2, text=None, progress_color="#006495", variable=self.switch_var,
-        #                                       onvalue="on", offvalue="off", command=self.toggle_view)
-        # self.switch.place(x=266, y=16)
         
         self.switch = customtkinter.CTkSwitch(master=self.input, width=55, height=29, switch_width=52, switch_height=27,
                                               variable=self.switch_var, fg_color="#D9D9D9", button_color="#006495",
@@ -629,6 +622,8 @@ class Ui_home:
         self.save_button = customtkinter.CTkButton(master=self.manual_frame, width=56, height=45, corner_radius=10,
                                                    text=None, image=self.ceklis)
         self.save_button.place(x=235, y=0)
+        self.save_button.configure(command=self.save_manual_data)
+
         
         # ====== EC =====
         self.text1 = customtkinter.CTkLabel(master=self.manual_frame,
@@ -813,9 +808,70 @@ class Ui_home:
             # Show Input Frame 1 and hide Input Frame 2
             self.manual_frame.place_forget()
             self.auto_frame.place(x=30, y=55)
+            # Muat data ke dropdown saat beralih ke Auto
+            self.load_presets()
             
     def stop_binding_return(self):
         self.root.unbind("<Return>")
+        
+    def load_presets(self):
+        """
+        Memuat data preset dari database ke dropdown.
+        """
+        try:
+            # Ambil data dari database
+            preset_names = self.db_connection.fetch_presets()
+
+            if preset_names:
+                # Jika ada data, masukkan ke dropdown
+                self.dropdown.configure(values=preset_names)
+            else:
+                # Jika tidak ada data
+                self.dropdown.configure(values=["No presets available"])
+        except Exception as e:
+            print(f"Error loading presets: {e}")
+            self.dropdown.configure(values=["Error loading presets"])
+            
+    def save_manual_data(self):
+        """
+        Simpan data dari mode manual ke tabel presets.
+        """
+        try:
+            name = self.input_name.get()
+            ec = self.data_ec.get()
+            ph = self.data_ph.get()
+            humidity = self.data_hum.get()
+            volume = self.data_vol.get()
+            population = self.data_plant.get()
+
+            if not name or not ec or not ph or not humidity or not volume or not population:
+                raise ValueError("All fields must be filled!")
+
+            # Simpan ke database
+            self.db_connection.db_connected()
+            query = """
+                INSERT INTO presets (name, ec, ph, humidity, volume, population)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            self.db_connection.cursor.execute(query, (name, ec, ph, humidity, volume, population))
+            self.db_connection.mysql_connection.commit()
+            print("Data saved successfully!")
+
+            # Reset input fields
+            self.input_name.delete(0, 'end')
+            self.data_ec.delete(0, 'end')
+            self.data_ph.delete(0, 'end')
+            self.data_hum.delete(0, 'end')
+            self.data_vol.delete(0, 'end')
+            self.data_plant.delete(0, 'end')
+
+            # Perbarui dropdown
+            self.load_presets()
+
+        except Exception as e:
+            print(f"Error saving manual data: {e}")
+
+
         
 # root = customtkinter.CTk
 # square_frame = customtkinter.CTk
