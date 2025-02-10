@@ -9,6 +9,7 @@ from ui.ui_category import Ui_category
 from ui.ui_tables import Ui_table
 from ui.ui_waiter import Ui_waiter
 from utils.log import log
+from utils.clear_frame import clear_frame
 
 class Ui_panel:
     def __init__(self, username: str, root: customtkinter.CTk):
@@ -43,7 +44,7 @@ class Ui_panel:
                                                    corner_radius=0,
                                                    fg_color="#E9F4F9")
         self.square_frame.place(x=92, y=70)
-
+        
         self.ui_images()
         self.ui_widgets()
 
@@ -95,6 +96,12 @@ class Ui_panel:
         self.account_icon = customtkinter.CTkImage(dark_image=self.account_icon,
                                                   light_image=self.account_icon, 
                                                   size=(35, 29))
+        
+        # for manual valve icon
+        self.malual_valve = Image.open("images/home_images/manual-ctrl.png")
+        self.malual_valve = customtkinter.CTkImage(dark_image=self.malual_valve,
+                                                  light_image=self.malual_valve, 
+                                                  size=(121, 20))
 
     def ui_widgets(self):
         self.pizza_label = customtkinter.CTkLabel(master=self.banner_frame, 
@@ -102,6 +109,12 @@ class Ui_panel:
                                                   text_color="#006495", 
                                                   font=("Poppins", 20, "bold"))
         self.pizza_label.place(x=400, y=20)
+        
+        self.malual_valve = customtkinter.CTkButton(master=self.banner_frame,
+                                                       width=121, height=20, 
+                                                       fg_color="#E1F8FF", hover_color="#ffffff",
+                                                       text=None, image=self.malual_valve, command=self.ui_manual)
+        self.malual_valve.place(x=870, y=25)
 
         self.logo = customtkinter.CTkLabel(master=self.sidebar_frame,
                                            width=47, height=47,
@@ -198,7 +211,163 @@ class Ui_panel:
         self.version = customtkinter.CTkLabel(master=self.sidebar_frame,
                                               text="V 1.0.1", font=("Poppins", 10, "bold"),
                                               text_color="#006495")
-        self.version.place(x=15, y=491)
+        self.version.place(x=15, y=491) 
+    
+    def ui_manual(self):
+        # self.clear_frame(self.square_frame)
+
+        # self.topbar()
+
+        # self.topbar_label.configure(text="Add Customer")
+        # self.searchcustomers_entry.destroy()
+        # self.searchcustomers_button.destroy()
+
+        self.frame_one = customtkinter.CTkFrame(master=self.root,
+                                                width=1024, height=600,
+                                                corner_radius=10, 
+                                                fg_color="#ffffff")
+        self.frame_one.place(x=0, y=0)
+        
+        self.title = customtkinter.CTkLabel(master=self.frame_one,
+                                                 font=("Poppins", 40, "bold"),
+                                                 text_color="#006495",
+                                                 text="Manual Control")
+        self.title.place(x=355, y=46)
+
+        self.label1 = customtkinter.CTkLabel(master=self.frame_one,
+                                                 font=("Poppins", 12),
+                                                 text_color="#006495",
+                                                 text="Channel A")
+        self.label1.place(x=188, y=173.38)
+        
+        self.switch1 = customtkinter.CTkSwitch(master=self.frame_one, width=70, height=29.75, 
+                                               switch_width=70, switch_height=29.75,
+                                               fg_color="#D9D9D9", button_color="#006495",
+                                               button_hover_color="#006495", text=None,
+                                               onvalue="on", offvalue="off")
+        self.switch1.place(x=357, y=173.75)
+
+        self.label2 = customtkinter.CTkLabel(master=self.frame_one,
+                                                   font=("Poppins", 12),
+                                                   text_color="#006495",
+                                                   text="Channel B")
+        self.label2.place(x=188, y=255.75)
+        
+        self.switch2 = customtkinter.CTkSwitch(master=self.frame_one, width=70, height=29.75, 
+                                               switch_width=70, switch_height=29.75,
+                                               fg_color="#D9D9D9", button_color="#006495",
+                                               button_hover_color="#006495", text=None,
+                                               onvalue="on", offvalue="off")
+        self.switch2.place(x=357, y=256.25)
+
+        self.label3 = customtkinter.CTkLabel(master=self.frame_one,
+                                                      font=("Poppins", 12),
+                                                      text_color="#006495",
+                                                      text="Channel C")
+        self.label3.place(x=188, y=338.87)
+        
+        self.switch3 = customtkinter.CTkSwitch(master=self.frame_one, width=70, height=29.75, 
+                                               switch_width=70, switch_height=29.75,
+                                               fg_color="#D9D9D9", button_color="#006495",
+                                               button_hover_color="#006495", text=None,
+                                               onvalue="on", offvalue="off")
+        self.switch3.place(x=357, y=339)
+
+        self.label4 = customtkinter.CTkLabel(master=self.frame_one,
+                                                  font=("Poppins", 12),
+                                                  text_color="#006495",
+                                                  text="Channel D")
+        self.label4.place(x=188, y=421.25)
+        
+        self.switch4 = customtkinter.CTkSwitch(master=self.frame_one, width=70, height=29.75, 
+                                               switch_width=70, switch_height=29.75,
+                                               fg_color="#D9D9D9", button_color="#006495",
+                                               button_hover_color="#006495", text=None,
+                                               onvalue="on", offvalue="off")
+        self.switch4.place(x=357, y=421.75)
+        
+        # ===== Veritcal Line =====
+        self.line = customtkinter.CTkFrame(master=self.frame_one,
+                                                width=2, height=285,
+                                                fg_color="#006495")
+        self.line.place(x=502, y=170)
+        
+        self.label5 = customtkinter.CTkLabel(master=self.frame_one,
+                                                  font=("Poppins", 12),
+                                                  text_color="#006495",
+                                                  text="Valve In")
+        self.label5.place(x=522, y=173.38)
+        
+        self.switch5 = customtkinter.CTkSwitch(master=self.frame_one, width=70, height=29.75, 
+                                               switch_width=70, switch_height=29.75,
+                                               fg_color="#D9D9D9", button_color="#006495",
+                                               button_hover_color="#006495", text=None,
+                                               onvalue="on", offvalue="off")
+        self.switch5.place(x=691, y=175.5)
+        
+        self.label6 = customtkinter.CTkLabel(master=self.frame_one,
+                                                  font=("Poppins", 12),
+                                                  text_color="#006495",
+                                                  text="Valve Out")
+        self.label6.place(x=522, y=255.75)
+        
+        self.switch6 = customtkinter.CTkSwitch(master=self.frame_one, width=70, height=29.75, 
+                                               switch_width=70, switch_height=29.75,
+                                               fg_color="#D9D9D9", button_color="#006495",
+                                               button_hover_color="#006495", text=None,
+                                               onvalue="on", offvalue="off")
+        self.switch6.place(x=691, y=256.25)
+        
+        self.label7 = customtkinter.CTkLabel(master=self.frame_one,
+                                                  font=("Poppins", 12),
+                                                  text_color="#006495",
+                                                  text="Puimp")
+        self.label7.place(x=522, y=338.5)
+        
+        self.switch7 = customtkinter.CTkSwitch(master=self.frame_one, width=70, height=29.75, 
+                                               switch_width=70, switch_height=29.75,
+                                               fg_color="#D9D9D9", button_color="#006495",
+                                               button_hover_color="#006495", text=None,
+                                               onvalue="on", offvalue="off")
+        self.switch7.place(x=691, y=339)
+        
+        self.close_btn = customtkinter.CTkButton(master=self.frame_one,
+                                                width=18.67, height=18.67, 
+                                                font=("Poppins", 18.67),
+                                                text_color="#006495",
+                                                text="X", fg_color="#ffffff",
+                                                hover_color="#ffffff",
+                                                command=self.toback)
+        self.close_btn.place(x=975, y=60)
+        
+        # self.cancel_button = customtkinter.CTkButton(master=self.frame_one,
+        #                                              width=50, height=50,
+        #                                              corner_radius=3,
+        #                                              font=("arial", 15),
+        #                                              text_color="#006495",
+        #                                              text="X",
+        #                                              fg_color="#5c5c5c", 
+        #                                              hover_color="#6e6e6e",
+        #                                              command=self.toback)
+        # self.cancel_button.place(x=5, y=5)
+
+        self.divider_frame = customtkinter.Frame(master=self.square_frame, 
+                                           height=1, width=800, 
+                                           bg="#dbdbdb")
+        self.divider_frame.place(x=0, y=855)
+
+        self.addcustomer_button = customtkinter.CTkButton(master=self.square_frame,
+                                                          width=230, height=32,
+                                                          corner_radius=3,
+                                                          font=("arial", 15),
+                                                          text_color="#ffffff",
+                                                          text="Add Customer",
+                                                          fg_color="#4bb34b", 
+                                                          hover_color="#7ebf7e",
+                                                          command=self.create_person)
+        self.addcustomer_button.place(x=650, y=100)
+
+        self.root.bind("<Return>", lambda _: self.addcustomer_button.invoke())
 
     def home_interface(self):
         Ui_home(username=self.__username, root=self.root, square_frame=self.square_frame)
@@ -236,3 +405,9 @@ class Ui_panel:
         self.current_button.configure(fg_color="#ffffff")
         self.current_button = target_button
         self.current_button.configure(fg_color="#E1F8FF")
+
+    def toback(self):
+        clear_frame(self.frame_one)
+        # self.ui_widgets()
+        Ui_panel()
+        

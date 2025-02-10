@@ -1,7 +1,6 @@
 from database.connection.db_connection import Db_connection
 from tkinter import messagebox
 from utils.log import log
-from ui.ui_home import Ui_home
 
 class DbSensor(Db_connection):
     def __init__(self):
@@ -82,30 +81,30 @@ class DbSensor(Db_connection):
 if __name__ == "__main__":
     # Data dummy untuk pengujian
     dummy_data = {
-        "air_temp": temperature,
-        "air_hum": humidity,
-        "light_int": lux,
-        "rain_int": rain_intensity,
-        "flow_1": flow_rates[0],
-        "flow_2": flow_rates[1],
-        "flow_3": flow_rates[2],
-        "flow_4": flow_rates[3],
-        "water_ph": water_ph,
-        "water_ec": ec_air,
-        "soil_1_hum": hum_tanah_1,
-        "soil_1_temp": temp_tanah_1,
-        "soil_1_ec": ec_tanah_1,
-        "soil_1_ph": ph_tanah_1,
-        "soil_1_nitro": nitro_1,
-        "soil_1_fosfor": fosfor_1,
-        "soil_1_kalium": kalium_1,
-        "soil_2_hum": hum_tanah_2,
-        "soil_2_temp": temp_tanah_2,
-        "soil_2_ec": ec_tanah_2,
-        "soil_2_ph": ph_tanah_2,
-        "soil_2_nitro": nitro_2,
-        "soil_2_fosfor": fosfor_2,
-        "soil_2_kalium": kalium_2,
+        "air_temp": 25.5,
+        "air_hum": 60.2,
+        "light_int": 450.0,
+        "rain_int": 0.0,
+        "flow_1": 1.2,
+        "flow_2": 1.1,
+        "flow_3": 0.9,
+        "flow_4": 1.3,
+        "water_ph": 6.8,
+        "water_ec": 1.5,
+        "soil_1_hum": 25.0,
+        "soil_1_temp": 24.5,
+        "soil_1_ec": 0.8,
+        "soil_1_ph": 6.5,
+        "soil_1_nitro": 50.0,
+        "soil_1_fosfor": 30.0,
+        "soil_1_kalium": 40.0,
+        "soil_2_hum": 22.5,
+        "soil_2_temp": 23.8,
+        "soil_2_ec": 0.7,
+        "soil_2_ph": 6.4,
+        "soil_2_nitro": 48.0,
+        "soil_2_fosfor": 28.0,
+        "soil_2_kalium": 35.0,
     }
 
 

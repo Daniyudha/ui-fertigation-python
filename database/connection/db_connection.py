@@ -14,13 +14,13 @@ class Db_connection:
         except Exception as error:
             messagebox.showerror("Error!", f"Error: {error}\nFile error: database/connection/config.json")
 
-    def db_connected(self, database: str | None ="py") -> True:
+    def db_connected(self, database: str | None ="ferti_monitoring") -> True:
         try:            
             self.mysql_connection = mysql.connector.connect(
                 host = self.__host,
                 user = self.__user,
                 password = self.__password,
-                database = "py"
+                database = "ferti_monitoring"
             )
             self.cursor = self.mysql_connection.cursor()
         except Exception as error:

@@ -18,7 +18,7 @@ class Ui_home:
         self.__username = username
         self.root = root
         self.square_frame = square_frame
-        self.root.unbind("<Return>")
+        # self.root.unbind("<Return>")
         
         
         # Inisialisasi Sensor Reader     
@@ -51,7 +51,7 @@ class Ui_home:
         # self.run()
         
     def update_pressure_sensor(self):
-        # Ambil data dari sensor tekanan
+        # Ambil data dari sensor `tekanan`
         pressure = self.pressure_reader.get_pressure(channel=2)
 
         # Perbarui label UI
