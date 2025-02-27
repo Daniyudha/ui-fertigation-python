@@ -11,9 +11,11 @@ from hardware.ph import pHSensor
 from hardware.light_flow import light_flowSensor
 from hardware.serial_read import SerialReader
 from hardware.Pressure import PressureSensor
+from tkinter import messagebox
+import mysql.connector
 import threading
 
-class Ui_home:
+class Ui_home():
     def __init__(self, username: str, root: customtkinter.CTk, square_frame: customtkinter.CTk):
         self.__username = username
         self.root = root
@@ -35,6 +37,7 @@ class Ui_home:
         self.water_soil.connect()
         self.water_soil.start_reading()
         
+        
         clear_frame(self.square_frame)
         self.ui_images()
         self.ui_widgets()
@@ -49,6 +52,17 @@ class Ui_home:
         self.update_pressure_sensor()
         # self.update_flowSensor()
         # self.run()
+        self.db_connect()
+        self.load_presets()
+
+    def db_connect(self):
+        self.conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="RedAnt69!",
+            database="ferti_monitoring"
+        )
+        self.cursor = self.conn.cursor()
         
     def update_pressure_sensor(self):
         # Ambil data dari sensor `tekanan`
@@ -529,7 +543,8 @@ class Ui_home:
         #===== Dropdown Menu =====
         self.dropdown = customtkinter.CTkComboBox(master=self.auto_frame, width=291, height=45, dropdown_fg_color="#E1F8FF", dropdown_text_color="#006495",
                                                   fg_color="#E1F8FF", text_color="#006495", border_color="#E1F8FF", button_color="#E1F8FF",
-                                                  values=["option 1", "option 2", "option 3"], font=("Poppins", 12), dropdown_font=("Poppins", 12))
+                                                  values=[], font=("Poppins", 12), dropdown_font=("Poppins", 12),
+                                                  command=self.load_selected_preset)
         self.dropdown.place(x=0, y=0)
         
         # ====== EC =====
@@ -620,10 +635,8 @@ class Ui_home:
         
         # ===== save btn =====
         self.save_button = customtkinter.CTkButton(master=self.manual_frame, width=56, height=45, corner_radius=10,
-                                                   text=None, image=self.ceklis)
+                                                   text=None, image=self.ceklis, command=self.save_manual_data)
         self.save_button.place(x=235, y=0)
-        self.save_button.configure(command=self.save_manual_data)
-
         
         # ====== EC =====
         self.text1 = customtkinter.CTkLabel(master=self.manual_frame,
@@ -814,63 +827,54 @@ class Ui_home:
     def stop_binding_return(self):
         self.root.unbind("<Return>")
         
-    def load_presets(self):
-        """
-        Memuat data preset dari database ke dropdown.
-        """
-        try:
-            # Ambil data dari database
-            preset_names = self.db_connection.fetch_presets()
-
-            if preset_names:
-                # Jika ada data, masukkan ke dropdown
-                self.dropdown.configure(values=preset_names)
-            else:
-                # Jika tidak ada data
-                self.dropdown.configure(values=["No presets available"])
-        except Exception as e:
-            print(f"Error loading presets: {e}")
-            self.dropdown.configure(values=["Error loading presets"])
-            
     def save_manual_data(self):
-        """
-        Simpan data dari mode manual ke tabel presets.
-        """
+        plant_name = self.input_name.get()
+        ec = self.data_ec.get()
+        ph = self.data_ph.get()
+        humidity = self.data_hum.get()
+        volume = self.data_vol.get()
+        population = self.data_plant.get()
+
+        if not plant_name or not ec or not ph or not humidity or not volume or not population:
+            messagebox.showwarning("Input Error", "Semua bidang harus diisi!")
+            return
+
         try:
-            name = self.input_name.get()
-            ec = self.data_ec.get()
-            ph = self.data_ph.get()
-            humidity = self.data_hum.get()
-            volume = self.data_vol.get()
-            population = self.data_plant.get()
-
-            if not name or not ec or not ph or not humidity or not volume or not population:
-                raise ValueError("All fields must be filled!")
-
-            # Simpan ke database
-            self.db_connection.db_connected()
-            query = """
+            self.cursor.execute("""
                 INSERT INTO presets (name, ec, ph, humidity, volume, population)
                 VALUES (%s, %s, %s, %s, %s, %s)
-            """
-            self.db_connection.cursor.execute(query, (name, ec, ph, humidity, volume, population))
-            self.db_connection.mysql_connection.commit()
-            print("Data saved successfully!")
-
-            # Reset input fields
-            self.input_name.delete(0, 'end')
-            self.data_ec.delete(0, 'end')
-            self.data_ph.delete(0, 'end')
-            self.data_hum.delete(0, 'end')
-            self.data_vol.delete(0, 'end')
-            self.data_plant.delete(0, 'end')
-
-            # Perbarui dropdown
+            """, (plant_name, ec, ph, humidity, volume, population))
+            self.conn.commit()
+            messagebox.showinfo("Success", "Data berhasil disimpan!")
             self.load_presets()
-
-        except Exception as e:
-            print(f"Error saving manual data: {e}")
-
+        except mysql.connector.Error as err:
+            messagebox.showerror("Database Error", f"Error: {err}")
+    
+    def load_presets(self):
+        self.cursor.execute("SELECT name FROM presets")
+        presets = [row[0] for row in self.cursor.fetchall()]
+        self.dropdown.configure(values=presets)
+    
+    def load_selected_preset(self, selected_preset):
+        self.cursor.execute("SELECT * FROM preset WHERE plant_name = %s", (selected_preset,))
+        preset = self.cursor.fetchone()
+        if preset:
+            self.input_name.delete(0, "end")
+            self.input_name.insert(0, preset[1])
+            self.data_ec.delete(0, "end")
+            self.data_ec.insert(0, preset[2])
+            self.data_ph.delete(0, "end")
+            self.data_ph.insert(0, preset[3])
+            self.data_hum.delete(0, "end")
+            self.data_hum.insert(0, preset[4])
+            self.data_vol.delete(0, "end")
+            self.data_vol.insert(0, preset[5])
+            self.data_plant.delete(0, "end")
+            self.data_plant.insert(0, preset[6])
+            
+    def close_connection(self):
+        self.cursor.close()
+        self.conn.close()
 
         
 # root = customtkinter.CTk

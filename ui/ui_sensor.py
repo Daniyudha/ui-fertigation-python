@@ -102,13 +102,13 @@ class Ui_sensor:
 
 #################################################################################
 
-        table_info = Db_table(self.__username).read_table()
-        table_unoccupied = table_occupied = 0
-        for i in table_info:
-            if i[1]:
-                table_occupied += 1
-            else:
-                table_unoccupied += 1
+        # table_info = Db_table(self.__username).read_table()
+        # table_unoccupied = table_occupied = 0
+        # for i in table_info:
+        #     if i[1]:
+        #         table_occupied += 1
+        #     else:
+        #         table_unoccupied += 1
 
 #################################################################################
 

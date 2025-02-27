@@ -10,6 +10,7 @@ from ui.ui_tables import Ui_table
 from ui.ui_waiter import Ui_waiter
 from utils.log import log
 from utils.clear_frame import clear_frame
+import serial
 
 class Ui_panel:
     def __init__(self, username: str, root: customtkinter.CTk):
@@ -18,6 +19,8 @@ class Ui_panel:
         self.root.geometry("1024x600")
         # self.root.attributes("-fullscreen", True)
         self.root.unbind("<Return>")
+        
+        self.ser = serial.Serial('/dev/serial0', 9600, timeout=1)
 
         self.main_frame = customtkinter.CTkFrame(master=self.root, 
                                                  width=1024, height=600,
@@ -328,7 +331,7 @@ class Ui_panel:
                                                switch_width=70, switch_height=29.75,
                                                fg_color="#D9D9D9", button_color="#006495",
                                                button_hover_color="#006495", text=None,
-                                               onvalue="on", offvalue="off")
+                                               onvalue="on", offvalue="off", command=self.toggle_relay7)
         self.switch7.place(x=691, y=339)
         
         self.close_btn = customtkinter.CTkButton(master=self.frame_one,
@@ -408,6 +411,11 @@ class Ui_panel:
 
     def toback(self):
         clear_frame(self.frame_one)
-        # self.ui_widgets()
-        Ui_panel()
+        self.ui_widgets()
         
+    def toggle_relay7(self):
+        if self.switch7.get() == "0":
+            self.ser.write(b'RELAY:5:0x0007:ON\n')
+        else:
+            self.ser.write(b'RELAY:5:0x0007:OFF\n')
+    
