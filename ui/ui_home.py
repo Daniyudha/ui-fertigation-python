@@ -54,15 +54,15 @@ class Ui_home():
         # self.run()
         self.db_connect()
         self.load_presets()
-
+        
     def db_connect(self):
-        self.conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="RedAnt69!",
-            database="ferti_monitoring"
-        )
-        self.cursor = self.conn.cursor()
+        self.db = Db_connection()
+        if self.db.db_connected():
+            self.conn = self.db.mysql_connection
+            self.cursor = self.db.cursor
+            self.db_preset = Db_preset(self.__username)
+        else:
+            messagebox.showerror("Database Error", "Gagal terhubung ke database")
         
     def update_pressure_sensor(self):
         # Ambil data dari sensor `tekanan`
@@ -840,41 +840,49 @@ class Ui_home():
             return
 
         try:
-            self.cursor.execute("""
-                INSERT INTO presets (name, ec, ph, humidity, volume, population)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (plant_name, ec, ph, humidity, volume, population))
-            self.conn.commit()
-            messagebox.showinfo("Success", "Data berhasil disimpan!")
-            self.load_presets()
-        except mysql.connector.Error as err:
-            messagebox.showerror("Database Error", f"Error: {err}")
+            ec = float(ec)
+            ph = float(ph)
+            humidity = float(humidity)
+            volume = float(volume)
+            population = int(population)
+
+            if self.db_preset.create_preset(plant_name, ec, ph, humidity, volume, population):
+                self.load_presets()
+        except ValueError:
+            messagebox.showwarning("Input Error", "Nilai EC, PH, Humidity, Volume harus angka, dan Population harus bilangan bulat!")
     
     def load_presets(self):
-        self.cursor.execute("SELECT name FROM presets")
-        presets = [row[0] for row in self.cursor.fetchall()]
-        self.dropdown.configure(values=presets)
-    
+        try:
+            presets = self.db_preset.read_preset()
+            preset_names = [row[1] for row in presets]  # Ambil hanya nama preset
+            if preset_names:
+                self.dropdown.configure(values=preset_names)
+            else:
+                self.dropdown.configure(values=["No Presets Available"])
+        except mysql.connector.Error as e:
+            messagebox.showerror("Database Error", f"Gagal mengambil data: {e}")
+
     def load_selected_preset(self, selected_preset):
-        self.cursor.execute("SELECT * FROM preset WHERE plant_name = %s", (selected_preset,))
-        preset = self.cursor.fetchone()
-        if preset:
-            self.input_name.delete(0, "end")
-            self.input_name.insert(0, preset[1])
-            self.data_ec.delete(0, "end")
-            self.data_ec.insert(0, preset[2])
-            self.data_ph.delete(0, "end")
-            self.data_ph.insert(0, preset[3])
-            self.data_hum.delete(0, "end")
-            self.data_hum.insert(0, preset[4])
-            self.data_vol.delete(0, "end")
-            self.data_vol.insert(0, preset[5])
-            self.data_plant.delete(0, "end")
-            self.data_plant.insert(0, preset[6])
-            
-    def close_connection(self):
-        self.cursor.close()
-        self.conn.close()
+        try:
+            presets = self.db_preset.search_category(selected_preset)
+            if presets:
+                preset = presets[0]
+                self.input_name.delete(0, "end")
+                self.input_name.insert(0, preset[1])
+                self.data_ec.delete(0, "end")
+                self.data_ec.insert(0, str(preset[2]))
+                self.data_ph.delete(0, "end")
+                self.data_ph.insert(0, str(preset[3]))
+                self.data_hum.delete(0, "end")
+                self.data_hum.insert(0, str(preset[4]))
+                self.data_vol.delete(0, "end")
+                self.data_vol.insert(0, str(preset[5]))
+                self.data_plant.delete(0, "end")
+                self.data_plant.insert(0, str(preset[6]))
+        except mysql.connector.Error as e:
+            messagebox.showerror("Database Error", f"Gagal mengambil data: {e}")
+
+
 
         
 # root = customtkinter.CTk

@@ -89,10 +89,10 @@ class Ui_panel:
                                                   size=(35, 29))
         
         # for tools icon
-        self.tools_icon = Image.open("images/home_images/setting-btn.png")
+        self.tools_icon = Image.open("images/home_images/manual-ctrl-btn.png")
         self.tools_icon = customtkinter.CTkImage(dark_image=self.tools_icon,
                                                   light_image=self.tools_icon, 
-                                                  size=(35, 29))
+                                                  size=(40, 40))
         
         # for account icon
         self.account_icon = Image.open("images/home_images/account-btn.png")
@@ -101,10 +101,10 @@ class Ui_panel:
                                                   size=(35, 29))
         
         # for manual valve icon
-        self.malual_valve = Image.open("images/home_images/manual-ctrl.png")
-        self.malual_valve = customtkinter.CTkImage(dark_image=self.malual_valve,
-                                                  light_image=self.malual_valve, 
-                                                  size=(121, 20))
+        # self.malual_valve = Image.open("images/home_images/manual-ctrl.png")
+        # self.malual_valve = customtkinter.CTkImage(dark_image=self.malual_valve,
+        #                                           light_image=self.malual_valve, 
+        #                                           size=(121, 20))
 
     def ui_widgets(self):
         self.pizza_label = customtkinter.CTkLabel(master=self.banner_frame, 
@@ -113,11 +113,11 @@ class Ui_panel:
                                                   font=("Poppins", 20, "bold"))
         self.pizza_label.place(x=400, y=20)
         
-        self.malual_valve = customtkinter.CTkButton(master=self.banner_frame,
-                                                       width=121, height=20, 
-                                                       fg_color="#E1F8FF", hover_color="#ffffff",
-                                                       text=None, image=self.malual_valve, command=self.ui_manual)
-        self.malual_valve.place(x=870, y=25)
+        # self.malual_valve = customtkinter.CTkButton(master=self.banner_frame,
+        #                                                width=121, height=20, 
+        #                                                fg_color="#E1F8FF", hover_color="#ffffff",
+        #                                                text=None, image=self.malual_valve, command=self.ui_manual)
+        # self.malual_valve.place(x=870, y=25)
 
         self.logo = customtkinter.CTkLabel(master=self.sidebar_frame,
                                            width=47, height=47,
@@ -157,7 +157,7 @@ class Ui_panel:
                                                        command=self.customer_interface)
         self.customer_button.place(x=10, y=256.5)
 
-        self.waiter_button = customtkinter.CTkButton(master=self.sidebar_frame,
+        self.manual_button = customtkinter.CTkButton(master=self.sidebar_frame,
                                                      width=40, height=60,
                                                      corner_radius=5,
                                                      fg_color="#ffffff",
@@ -166,7 +166,7 @@ class Ui_panel:
                                                      image=self.tools_icon,
                                                      font=("arial", 17),
                                                      command=self.waiter_interface)
-        self.waiter_button.place(x=10, y=331.5)
+        self.manual_button.place(x=10, y=331.5)
 
         # self.category_button = customtkinter.CTkButton(master=self.sidebar_frame,
         #                                                width=50, height=50,
@@ -318,13 +318,13 @@ class Ui_panel:
                                                switch_width=70, switch_height=29.75,
                                                fg_color="#D9D9D9", button_color="#006495",
                                                button_hover_color="#006495", text=None,
-                                               onvalue="on", offvalue="off")
+                                               onvalue="on", offvalue="off", command=self.toggle_relay6)
         self.switch6.place(x=691, y=256.25)
         
         self.label7 = customtkinter.CTkLabel(master=self.frame_one,
                                                   font=("Poppins", 12),
                                                   text_color="#006495",
-                                                  text="Puimp")
+                                                  text="Pump")
         self.label7.place(x=522, y=338.5)
         
         self.switch7 = customtkinter.CTkSwitch(master=self.frame_one, width=70, height=29.75, 
@@ -412,10 +412,19 @@ class Ui_panel:
     def toback(self):
         clear_frame(self.frame_one)
         self.ui_widgets()
-        
-    def toggle_relay7(self):
+       
+    def toggle_relay6(self):
         if self.switch7.get() == "0":
-            self.ser.write(b'RELAY:5:0x0007:ON\n')
+            self.ser.write(b"5 ON 7") 
         else:
-            self.ser.write(b'RELAY:5:0x0007:OFF\n')
-    
+            self.ser.write(b"5 OFF 7")
+                
+    def toggle_relay7(self):
+        value = self.switch7.get()  # Dapatkan nilai switch
+        if value == "off":
+            self.ser.write(b"5 OFF 7\n")  # Tambahkan \n di akhir
+            print("Mengirim: 5 OFF 7")
+        else:
+            self.ser.write(b"5 ON 7\n")  # Tambahkan \n di akhir
+            print("Mengirim: 5 ON 7")
+

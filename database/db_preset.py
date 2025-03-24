@@ -11,7 +11,7 @@ class Db_preset(Db_connection):
         self.db_connected()
 
     def create_preset(self, name: str, ec: float, ph: float, humidity: float, volume: float, population: float):
-        self.__entry_items = {"name": name, "ec": ec, "ph": ph, "humidity": float, "volume": float, "population": int}
+        self.__entry_items = {"name": name, "ec": ec, "ph": ph, "humidity": humidity, "volume": volume, "population": population}
         if not empty_entries(**self.__entry_items):
             try:
                 self.cursor.execute("""INSERT INTO presets (name, ec, ph, humidity, volume, population) 
@@ -30,7 +30,7 @@ class Db_preset(Db_connection):
                 return True
             finally:
                 self.cursor.close()
-                self.mysql_connection.close
+                self.mysql_connection.close()
 
     def read_preset(self) -> list[tuple]:
         try:
@@ -51,7 +51,7 @@ class Db_preset(Db_connection):
             try:
                 self.cursor.execute("""UPDATE presets
                                     SET name = %s, ec = %s, ph = %s, humidity = %s, volume = %s, population = %s
-                                    WHERE Preset = %s""", (new_name, new_ec, new_ph, new_humidity, new_volume, new_population))
+                                    WHERE name = %s""", (new_name, new_ec, new_ph, new_humidity, new_volume, new_population))
                 self.mysql_connection.commit()
             except Exception as error:
                 messagebox.showerror(title=None, message=f"Error: {error}")
@@ -71,12 +71,12 @@ class Db_preset(Db_connection):
             messagebox.showerror(title=None, message=f"Error: {error}")
         else:
             messagebox.showinfo(title=None, message=f"{name.capitalize()} Preset successfully deleted")
-            log().info(f'User: "{self.__username}" Preset the "{name}" Preset')
+            log().info(f'User: "{self.__username}" deleted the "{name}" Preset')
         finally:
             self.cursor.close()
             self.mysql_connection.close()
 
-    def search_category(self, typed: str) -> str:
+    def search_category(self, typed: str) -> list:
         try:
             self.cursor.execute("SELECT * FROM presets WHERE name LIKE %s", ("%" + typed + "%",))
             self.result = self.cursor.fetchall()
